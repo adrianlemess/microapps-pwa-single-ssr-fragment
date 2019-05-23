@@ -1,0 +1,27 @@
+{
+  "name": "poc-router-skippper",
+  "version": "1.0.0",
+  "description": "POC to router with skipper",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "start-skipper": "skipper -routes-file eskipper/index.eskip",
+    "install-fragments": "lerna bootstrap",
+    "build-fragments": "lerna run build",
+    "watch-fragments": "lerna run --parallel watch",
+    "start-fragments": "lerna run --parallel start"
+  },
+  "author": "adrianlemess",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "express": "^4.16.4",
+    "node-tailor": "^3.9.2"
+  },
+  "devDependencies": {
+    "lerna": "^3.13.2",
+    "nodemon": "^1.18.11"
+  }
+}

@@ -1,0 +1,15 @@
+.nav-item {
+    width: 100px;
+    height: 18px;
+    margin-right: 20px;
+    cursor: pointer;
+    transition: all .3s;
+    border-radius: 3px;
+    background: #32c225;
+    &:not(.current):hover {
+        background: lighten(#32c225, 10%);
+    }
+    &.current {
+        background: #ebcb8b;
+    }
+}
