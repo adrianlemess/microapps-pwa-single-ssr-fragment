@@ -22,8 +22,8 @@ const readFilesRecursively = (distPath, fullDistPath) => {
 
       filesMapped = [...filesMapped, ...results];
     } else {
-      const filesMapped = file.split(`${fullDistPath}/`);
-      const fileMapped = filesMapped[1].replace('/', '-');
+      const filesSplited = file.split(`${fullDistPath}/`);
+      const fileMapped = filesSplited[1].replace('/', '-');
       filesMapped.push(fileMapped);
     }
   }
