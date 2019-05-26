@@ -4,9 +4,9 @@ module.exports = {
   entry: './common.js',
   output: {
     path: __dirname + '/public',
-    publicPath: 'http://localhost:8089/public/',
+    publicPath: 'http://localhost:4000/common/',
     filename: 'bundleCommon.js',
-    libraryTarget: 'umd'
+    libraryTarget: 'amd'
   },
   plugins:[
     new CleanWebpackPlugin()

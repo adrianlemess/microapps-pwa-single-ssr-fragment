@@ -6,10 +6,11 @@ const {
   join
 } = require('path')
 const express = require('express');
-
+const compression = require('compression');
 const {
   getDirectoriesName,
-  readFilesRecursively
+  readFilesRecursively,
+  getFileByName
 } = require('./utils/file-utils');
 const {
   buildLinkHeader,
@@ -19,6 +20,8 @@ const PORT = process.env.PORT || 4000;
 const app = express()
 const ROUTE = process.env.ROUTE || `http://localhost:${PORT}`;
 const ROOT_FOLDER_DISTS = 'dists';
+
+app.use(compression());
 
 app.get('/favicon.ico', (_, response) => response
   .type('ico')
@@ -35,12 +38,22 @@ for (let i = 0; i < directories.length; i++) {
   const directoryName = directories[i];
   const filesPath = readFilesRecursively(join(__dirname, ROOT_FOLDER_DISTS, directoryName));
   const headers = buildLinkHeader(filesPath, `${ROUTE}/${directoryName}`, `${ROUTE}/`)
+  const mapFiles = filesPath.reduce((prev, curr) => {
+    if (curr.includes('.js') || curr.includes('.html')) {
+      return {
+        ...prev,
+        [`${directoryName}-${curr}`]: getFileByName(`${ROOT_FOLDER_DISTS}/${directoryName}/`, curr)
+      };
+    }
+
+  }, {});
   createAppRouters(
     {
       app, 
       directoryName, 
       headers, 
-      rootFolderDist: ROOT_FOLDER_DISTS
+      rootFolderDist: ROOT_FOLDER_DISTS,
+      mapFiles
     });
 }
 

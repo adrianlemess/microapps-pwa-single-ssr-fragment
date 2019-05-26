@@ -1,0 +1,14 @@
+{
+    "name": "Mosaic Poc",
+    "short_name": "MS",
+    "lang": "en-US",
+    "start_url": "/",
+    "display": "browser",
+    "icons": [
+      {
+        "src": "/assets/icon.png",
+        "sizes": "192x192",
+        "type": "png"
+      }
+    ]
+  }

@@ -1,10 +1,89 @@
 const Tailor = require('node-tailor');
 const express = require('express');
+const filterReqHeadersFn = require('node-tailor/lib/filter-headers.js')
 
+const fragments = {
+    'common': {
+        port: 4000,
+        path: 'common',
+        async: false,
+        address: 'http://localhost'
+    },
+    'header': {
+        port: 4000,
+        path: 'header',
+        async: true,
+        address: 'http://localhost'
+    }
+}
 const app = express();
 const tailorInstance = new Tailor({
     maxAssetLinks: 20,
-    templatesPath: __dirname + '/pages'
+    handledTags: ['script'],
+    handleTag(request, tag, options, context) {
+        console.log(`${context['common'].src}/bundleCommon.js`)
+        // console.log('tag.attributes.type', tag.attributes.type);
+        return `
+        <script>
+            if (global === undefined) {
+                var global = window;
+            }
+        </script>
+        <script>
+            if ('serviceWorker' in navigator) {
+                console.log('yay')
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then((reg) => {
+                            console.log('Service Worker registered.', reg)
+                        })
+                })
+            }
+        </script>
+        <script>
+            (function (d) {
+                require(d);
+                console.log(d);
+                var arr = ['react', 'react-dom', 'prop-types', 'classnames', 'proppy', 'proppy-react'];
+                while (i = arr.pop())(function (dep) {
+                    console.log('dep', dep)
+                    define(dep, d, function (b) {
+                        console.log('b', b)
+                        return b[dep];
+                    })
+                })(i);
+                }(['${context['common'].src}/bundleCommon.js']));
+        </script>`
+    },
+    filterRequestHeaders(attributes, request) {
+        return {
+            ...filterReqHeadersFn(attributes, request),
+            'Custom-header': 12312312312
+        }
+    },
+    fetchContext(req) {
+        const urls = Object.values(fragments)
+            .map(({
+                port,
+                path,
+                address
+            }) => `${address}:${port}/${path}`)
+
+        const fragmentsMapped = Object.keys(fragments)
+            .reduce((prev, curr, index) => {
+                return ({
+                    ...prev,
+                    [curr]: {
+                        src: urls[index],
+                        async: fragments[curr].async
+                    }
+                })
+            }, {})
+        console.log('fragmentsMapped', fragmentsMapped);
+        return Promise.resolve(
+            fragmentsMapped
+        )
+    }
 })
 
 const PORT = process.env.PORT || 10000;

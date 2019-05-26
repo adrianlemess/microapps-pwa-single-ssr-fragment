@@ -4,7 +4,8 @@ const {
   createReadStream,
   readdirSync,
   statSync,
-  existsSync
+  existsSync,
+  readFileSync
 } = require('fs');
 
 const readFilesRecursively = (distPath, fullDistPath) => {
@@ -34,6 +35,16 @@ const getFileByName = (fullpath, filename) => {
   const pathMapped = join(fullpath, filename);
   const isExist = existsSync(pathMapped);
   if (isExist) {
+      return readFileSync(pathMapped, 'utf8')
+  }
+
+  throw new Error('Path specified is not a file');
+}
+
+const getFileByNameStreaming = (fullpath, filename) => {
+  const pathMapped = join(fullpath, filename);
+  const isExist = existsSync(pathMapped);
+  if (isExist) {
     return createReadStream(pathMapped);
   }
 
@@ -57,5 +68,6 @@ const getDirectoriesName = (pathDir) => {
 module.exports = {
   getDirectoriesName,
   getFileByName,
+  getFileByNameStreaming,
   readFilesRecursively
 }

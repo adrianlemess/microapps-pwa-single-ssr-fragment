@@ -2,7 +2,7 @@ const { readFileSync } = require('fs');
 const { renderToNodeStream } = require('react-dom/server');
 
 const {
-    getFileByName
+    getFileByNameStreaming
 } = require('./file-utils');
 const renderStream = require('./render-stream.js')
 
@@ -10,10 +10,10 @@ const getContentType = (filename) => {
     return _CONTENT_TYPES[filename.substring(filename.lastIndexOf('.'))] || 'text/plain';
 }
 
-const createAppRouters = ({ app, directoryName, headers, rootFolderDist }) => {
+const createAppRouters = ({ app, directoryName, headers, rootFolderDist, mapFiles }) => {
     let template = null;
     if (directoryName.includes('header')) {
-        template = readFileSync(`${rootFolderDist}/${directoryName}/index.html`, 'utf8')
+        template = mapFiles[`${directoryName}-index.html`]
     }
 
     app
@@ -29,11 +29,17 @@ const createAppRouters = ({ app, directoryName, headers, rootFolderDist }) => {
                 }
 
             // response
-            // .write(`
-            //     <script>window['header'] = ${JSON.stringify({}).replace(/</g, '\\\u003c')}</script>
-            // `)
+            response.write(`
+                <script>window['header'] = ${JSON.stringify({}).replace(/</g, '\\\u003c')}</script>
+            `)
             if (template) {
-                renderStream().pipe(response)
+                const stream = renderToNodeStream(renderStream());
+                stream.pipe(response)
+                // When React finishes rendering send the rest of your HTML to the browser
+                // stream.on('end', () => {
+                //     console.log('finished')
+                //     response.end('</div></body></html>');
+                // });
             } else {
                 response.end('')
             }
@@ -41,15 +47,21 @@ const createAppRouters = ({ app, directoryName, headers, rootFolderDist }) => {
         })
         .get(`/${directoryName}/:fileName*`, (req, res) => {
             let fileName = req.params.fileName;
-            console.log(fileName);
             res.header("Content-Type", getContentType(fileName));
             
             if (fileName.includes('-')) {
                 fileName = fileName.replace('-', '/');
             }
             try {
-                const response = getFileByName(`${rootFolderDist}/${directoryName}/`, fileName);
-                return response.pipe(res);
+                // Put everything in HashMap and calling hashMap
+                console.log('fileName', `${directoryName}-${fileName}`);
+                Object.keys(mapFiles).forEach(key => console.log('key', key));
+                if (fileName.includes('.js')) {
+                    const file = mapFiles[`${directoryName}-${fileName}`];
+                    return res.send(file);
+                }
+                const response = getFileByNameStreaming(`${rootFolderDist}/${directoryName}/`, fileName);
+                response.pipe(res);
             } catch (err) {
                 res.status(500).send(err.message);
             }
