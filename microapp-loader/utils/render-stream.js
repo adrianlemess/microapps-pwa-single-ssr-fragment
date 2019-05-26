@@ -1,4 +1,7 @@
-const entryServer = require('./entry-server.js');
+module.exports = (ContainerApp) => {
+    console.log('container', ContainerApp)
+    
+    const component = ContainerApp.serverSideApplication().application;
 
-module.exports = () => entryServer();
-
+    return component;
+};

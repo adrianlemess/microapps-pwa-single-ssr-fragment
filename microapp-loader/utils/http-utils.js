@@ -12,12 +12,13 @@ const getContentType = (filename) => {
 
 const createAppRouters = ({ app, directoryName, headers, rootFolderDist, mapFiles }) => {
     let template = null;
-    if (directoryName.includes('header')) {
-        template = mapFiles[`${directoryName}-index.html`]
+    if (mapFiles[`${directoryName}-index.html`]) {
+        template = mapFiles[`${directoryName}-index.html`].file
     }
 
     app
         .get(`/${directoryName}`, async (_, response) => {
+            console.log('firstResponse')
             response
                 .type('html')
                 .set({
@@ -33,13 +34,18 @@ const createAppRouters = ({ app, directoryName, headers, rootFolderDist, mapFile
                 <script>window['header'] = ${JSON.stringify({}).replace(/</g, '\\\u003c')}</script>
             `)
             if (template) {
-                const stream = renderToNodeStream(renderStream());
+                let component = null;
+                Object.keys(mapFiles).map(key => {
+                    if (key.includes(`${directoryName}-server`)) {
+                        component = mapFiles[key].component;
+                    }
+                });
+                const stream = renderToNodeStream(renderStream(component));
                 stream.pipe(response)
                 // When React finishes rendering send the rest of your HTML to the browser
-                // stream.on('end', () => {
-                //     console.log('finished')
-                //     response.end('</div></body></html>');
-                // });
+                stream.on('end', () => {
+                    response.end('</div></body></html>');
+                });
             } else {
                 response.end('')
             }
@@ -54,10 +60,8 @@ const createAppRouters = ({ app, directoryName, headers, rootFolderDist, mapFile
             }
             try {
                 // Put everything in HashMap and calling hashMap
-                console.log('fileName', `${directoryName}-${fileName}`);
-                Object.keys(mapFiles).forEach(key => console.log('key', key));
                 if (fileName.includes('.js')) {
-                    const file = mapFiles[`${directoryName}-${fileName}`];
+                    const file = mapFiles[`${directoryName}-${fileName}`].file;
                     return res.send(file);
                 }
                 const response = getFileByNameStreaming(`${rootFolderDist}/${directoryName}/`, fileName);

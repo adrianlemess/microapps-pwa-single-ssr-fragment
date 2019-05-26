@@ -5,6 +5,7 @@
 const {
   join
 } = require('path')
+const helmet = require('helmet');
 const express = require('express');
 const compression = require('compression');
 const {
@@ -21,7 +22,18 @@ const app = express()
 const ROUTE = process.env.ROUTE || `http://localhost:${PORT}`;
 const ROOT_FOLDER_DISTS = 'dists';
 
+const SixMonths = 15778476000;
 app.use(compression());
+app.use(helmet.frameguard());
+app.use(helmet.xssFilter());
+app.use(helmet.noSniff());
+app.use(helmet.ieNoOpen());
+app.use(helmet.hsts({
+  'maxAge': SixMonths,
+  'includeSubDomains': true,
+  'force': true
+}));
+app.disable('x-powered-by');
 
 app.get('/favicon.ico', (_, response) => response
   .type('ico')
@@ -42,7 +54,11 @@ for (let i = 0; i < directories.length; i++) {
     if (curr.includes('.js') || curr.includes('.html')) {
       return {
         ...prev,
-        [`${directoryName}-${curr}`]: getFileByName(`${ROOT_FOLDER_DISTS}/${directoryName}/`, curr)
+        [`${directoryName}-${curr}`]: { 
+            file: getFileByName(`${ROOT_FOLDER_DISTS}/${directoryName}/`, curr),
+            component: curr.includes('server') ? 
+              require(`./${ROOT_FOLDER_DISTS}/${directoryName}/${curr}`) : null
+        }
       };
     }
 
