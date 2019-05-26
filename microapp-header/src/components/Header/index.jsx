@@ -1,31 +1,11 @@
-import React, { useState } from 'react';
-import { compose, withProps, withState } from 'proppy';
-import PropTypes from 'prop-types';
-import { attach } from 'proppy-react';
+import React from 'react';
 
 import Logo from '../Logo';
 import NavItem from '../NavItem';
 import './styles.scss';
 
-const withHeaderState = compose(
-  withState('active', 'setActive', 1),
-  withProps({ items: [0, 1, 2, 3] })
-);
-
 // eslint-disable-next-line react/prop-types
 const Header = ({ items, active, setActive }) => {
-  const [counterState, setCounterState] = useState({
-    counter: 0
-  });
-
-  window.addEventListener('increaseCounter', event => {
-    setCounterState({ counter: counterState.counter + event.detail });
-  });
-
-  window.addEventListener('reset', () => {
-    setCounterState({ counter: 0 });
-  });
-
   return (
     <div className='header'>
       <Logo />
@@ -44,10 +24,4 @@ const Header = ({ items, active, setActive }) => {
   );
 };
 
-Header.propTypes = {
-  items: PropTypes.arrayOf(PropTypes.number).isRequired,
-  active: PropTypes.number.isRequired,
-  setActive: PropTypes.func.isRequired
-};
-
-export default attach(withHeaderState)(Header);
+export default Header;

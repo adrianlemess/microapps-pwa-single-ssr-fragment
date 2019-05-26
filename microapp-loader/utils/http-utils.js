@@ -1,20 +1,43 @@
-const path = require('path');
+const { readFileSync } = require('fs');
+const { renderToNodeStream } = require('react-dom/server');
+
 const {
     getFileByName
 } = require('./file-utils');
+const renderStream = require('./render-stream.js')
 
 const getContentType = (filename) => {
     return _CONTENT_TYPES[filename.substring(filename.lastIndexOf('.'))] || 'text/plain';
 }
 
 const createAppRouters = ({ app, directoryName, headers, rootFolderDist }) => {
+    let template = null;
+    if (directoryName.includes('header')) {
+        template = readFileSync(`${rootFolderDist}/${directoryName}/index.html`, 'utf8')
+    }
+
     app
         .get(`/${directoryName}`, async (_, response) => {
             response
                 .type('html')
                 .set({
                     'Link': headers
-                }).end('')
+                })
+                if (template) {
+                    response
+                        .write(template)
+                }
+
+            // response
+            // .write(`
+            //     <script>window['header'] = ${JSON.stringify({}).replace(/</g, '\\\u003c')}</script>
+            // `)
+            if (template) {
+                renderStream().pipe(response)
+            } else {
+                response.end('')
+            }
+
         })
         .get(`/${directoryName}/:fileName*`, (req, res) => {
             let fileName = req.params.fileName;
