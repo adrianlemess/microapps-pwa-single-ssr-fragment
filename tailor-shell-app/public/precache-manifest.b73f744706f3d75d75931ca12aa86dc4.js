@@ -10,9 +10,9 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "http://localhost:4000/header/index.html"
   },
   {
-    "url": "http://localhost:4000/header/server.1da8395614e23d61fb09.css"
+    "url": "http://localhost:4000/header/server.1da8395614e23d61fb09.js"
   },
   {
-    "url": "http://localhost:4000/header/server.1da8395614e23d61fb09.js"
+    "url": "http://localhost:4000/header/server.1da8395614e23d61fb09.css"
   }
 ]);

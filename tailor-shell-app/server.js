@@ -90,6 +90,15 @@ app.use(express.static(__dirname + '/public'))
 app.get('/health', (req, res) => {
     res.status(200).send({ status: 'ok'})
 })
+app.use('/sw.js', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    next();
+})
+
+app.use('/precache-manifest.b73f744706f3d75d75931ca12aa86dc5.js', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    next();
+})
 app.get('/*', (req, res) => {
     if (req.url === '/') {
         req.url = '/index'
