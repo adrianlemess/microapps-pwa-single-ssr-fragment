@@ -1,4 +1,3 @@
-const { readFileSync } = require('fs');
 const { renderToNodeStream } = require('react-dom/server');
 
 const {
@@ -12,13 +11,13 @@ const getContentType = (filename) => {
 
 const createAppRouters = ({ app, directoryName, headers, rootFolderDist, mapFiles }) => {
     let template = null;
-    if (mapFiles[`${directoryName}-index.html`]) {
+    Object.keys(mapFiles).forEach(key => console.log(key))
+    if (!!mapFiles[`${directoryName}-index.html`]) {
         template = mapFiles[`${directoryName}-index.html`].file
     }
 
     app
         .get(`/${directoryName}`, async (_, response) => {
-            console.log('firstResponse')
             response
                 .type('html')
                 .set({
@@ -28,22 +27,31 @@ const createAppRouters = ({ app, directoryName, headers, rootFolderDist, mapFile
                     response
                         .write(template)
                 }
-
+            console.log('chegou aqui0');
             // response
             response.write(`
                 <script>window['header'] = ${JSON.stringify({}).replace(/</g, '\\\u003c')}</script>
             `)
+            console.log('chegou aqui1');
+
             if (template) {
+                console.log('chegou aqui2');
+
                 let component = null;
                 Object.keys(mapFiles).map(key => {
                     if (key.includes(`${directoryName}-server`)) {
                         component = mapFiles[key].component;
                     }
                 });
+                console.log('chegou aqui3');
+
                 const stream = renderToNodeStream(renderStream(component));
+                console.log('chegou aqui4');
+
                 stream.pipe(response)
                 // When React finishes rendering send the rest of your HTML to the browser
                 stream.on('end', () => {
+                    console.log('end response');
                     response.end('</div></body></html>');
                 });
             } else {
@@ -63,9 +71,10 @@ const createAppRouters = ({ app, directoryName, headers, rootFolderDist, mapFile
                 if (fileName.includes('.js')) {
                     const file = mapFiles[`${directoryName}-${fileName}`].file;
                     return res.send(file);
+                } else {
+                    const response = getFileByNameStreaming(`${rootFolderDist}/${directoryName}/`, fileName);
+                    response.pipe(res);
                 }
-                const response = getFileByNameStreaming(`${rootFolderDist}/${directoryName}/`, fileName);
-                response.pipe(res);
             } catch (err) {
                 res.status(500).send(err.message);
             }

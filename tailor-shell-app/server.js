@@ -4,16 +4,14 @@ const filterReqHeadersFn = require('node-tailor/lib/filter-headers.js')
 
 const fragments = {
     'common': {
-        port: 4000,
         path: 'common',
         async: false,
-        address: 'http://localhost'
+        address: 'http://localhost:4000'
     },
     'header': {
-        port: 4000,
         path: 'header',
         async: true,
-        address: 'http://localhost'
+        address: 'http://localhost:4000'
     }
 }
 const app = express();
@@ -67,7 +65,7 @@ const tailorInstance = new Tailor({
                 port,
                 path,
                 address
-            }) => `${address}:${port}/${path}`)
+            }) => `${address}/${path}`)
 
         const fragmentsMapped = Object.keys(fragments)
             .reduce((prev, curr, index) => {
@@ -86,10 +84,12 @@ const tailorInstance = new Tailor({
     }
 })
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 13000;
 
 app.use(express.static(__dirname + '/public'))
-
+app.get('/health', (req, res) => {
+    res.status(200).send({ status: 'ok'})
+})
 app.get('/*', (req, res) => {
     if (req.url === '/') {
         req.url = '/index'

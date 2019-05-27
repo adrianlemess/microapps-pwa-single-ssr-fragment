@@ -34,11 +34,33 @@ app.use(helmet.hsts({
   'force': true
 }));
 app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 app.get('/favicon.ico', (_, response) => response
   .type('ico')
   .send(null)
 );
+
+const getFilesCached = (filesPath, directoryName) => 
+  filesPath.reduce((prev, curr) => {
+    if (curr.includes('.js') || curr.includes('.html')) {
+      console.log(`${directoryName}-${curr}`);
+      return {
+        ...prev,
+        [`${directoryName}-${curr}`]: { 
+            file: getFileByName(`${ROOT_FOLDER_DISTS}/${directoryName}/`, curr),
+            component: curr.includes('server') ? 
+              require(`./${ROOT_FOLDER_DISTS}/${directoryName}/${curr}`) : null
+        }
+      };
+    }
+    return { ...prev };
+  }, {});
+
 
 const directories = getDirectoriesName(ROOT_FOLDER_DISTS);
 
@@ -50,19 +72,7 @@ for (let i = 0; i < directories.length; i++) {
   const directoryName = directories[i];
   const filesPath = readFilesRecursively(join(__dirname, ROOT_FOLDER_DISTS, directoryName));
   const headers = buildLinkHeader(filesPath, `${ROUTE}/${directoryName}`, `${ROUTE}/`)
-  const mapFiles = filesPath.reduce((prev, curr) => {
-    if (curr.includes('.js') || curr.includes('.html')) {
-      return {
-        ...prev,
-        [`${directoryName}-${curr}`]: { 
-            file: getFileByName(`${ROOT_FOLDER_DISTS}/${directoryName}/`, curr),
-            component: curr.includes('server') ? 
-              require(`./${ROOT_FOLDER_DISTS}/${directoryName}/${curr}`) : null
-        }
-      };
-    }
-
-  }, {});
+  const mapFiles = getFilesCached(filesPath, directoryName);
   createAppRouters(
     {
       app, 
