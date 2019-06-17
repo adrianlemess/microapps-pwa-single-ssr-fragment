@@ -48,7 +48,6 @@ app.get('/favicon.ico', (_, response) => response
 const getFilesCached = (filesPath, directoryName) => 
   filesPath.reduce((prev, curr) => {
     if (curr.includes('.js') || curr.includes('.html')) {
-      console.log(`${directoryName}-${curr}`);
       return {
         ...prev,
         [`${directoryName}-${curr}`]: { 

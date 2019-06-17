@@ -8,8 +8,13 @@ const fragments = {
         async: false,
         address: 'http://localhost:4000'
     },
-    'header': {
-        path: 'header',
+    // 'header': {
+    //     path: 'header',
+    //     async: true,
+    //     address: 'http://localhost:4000'
+    // },
+    'body': {
+        path: 'body',
         async: true,
         address: 'http://localhost:4000'
     }
@@ -19,8 +24,6 @@ const tailorInstance = new Tailor({
     maxAssetLinks: 20,
     handledTags: ['script'],
     handleTag(request, tag, options, context) {
-        console.log(`${context['common'].src}/bundleCommon.js`)
-        // console.log('tag.attributes.type', tag.attributes.type);
         return `
         <script>
             if (global === undefined) {
@@ -29,7 +32,6 @@ const tailorInstance = new Tailor({
         </script>
         <script>
             if ('serviceWorker' in navigator) {
-                console.log('yay')
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.register('/sw.js')
                         .then((reg) => {
@@ -41,12 +43,9 @@ const tailorInstance = new Tailor({
         <script>
             (function (d) {
                 require(d);
-                console.log(d);
                 var arr = ['react', 'react-dom', 'prop-types', 'classnames', 'proppy', 'proppy-react'];
                 while (i = arr.pop())(function (dep) {
-                    console.log('dep', dep)
                     define(dep, d, function (b) {
-                        console.log('b', b)
                         return b[dep];
                     })
                 })(i);
@@ -77,25 +76,26 @@ const tailorInstance = new Tailor({
                     }
                 })
             }, {})
-        console.log('fragmentsMapped', fragmentsMapped);
         return Promise.resolve(
             fragmentsMapped
         )
     }
 })
 
-const PORT = process.env.PORT || 13000;
+const PORT = process.env.PORT || 9000;
 
 app.use(express.static(__dirname + '/public'))
 app.get('/health', (req, res) => {
-    res.status(200).send({ status: 'ok'})
+    res.status(200).send({
+        status: 'ok'
+    })
 })
 app.use('/sw.js', (req, res, next) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     next();
 })
 
-app.use('/precache-manifest.b73f744706f3d75d75931ca12aa86dc5.js', (req, res, next) => {
+app.use('/precache-manifest.a7bcc119d690cb85619d6f2f4a9cbc89.js', (req, res, next) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     next();
 })

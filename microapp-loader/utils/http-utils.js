@@ -11,7 +11,6 @@ const getContentType = (filename) => {
 
 const createAppRouters = ({ app, directoryName, headers, rootFolderDist, mapFiles }) => {
     let template = null;
-    Object.keys(mapFiles).forEach(key => console.log(key))
     if (!!mapFiles[`${directoryName}-index.html`]) {
         template = mapFiles[`${directoryName}-index.html`].file
     }
@@ -27,15 +26,12 @@ const createAppRouters = ({ app, directoryName, headers, rootFolderDist, mapFile
                     response
                         .write(template)
                 }
-            console.log('chegou aqui0');
             // response
             response.write(`
                 <script>window['header'] = ${JSON.stringify({}).replace(/</g, '\\\u003c')}</script>
             `)
-            console.log('chegou aqui1');
 
             if (template) {
-                console.log('chegou aqui2');
 
                 let component = null;
                 Object.keys(mapFiles).map(key => {
@@ -43,15 +39,12 @@ const createAppRouters = ({ app, directoryName, headers, rootFolderDist, mapFile
                         component = mapFiles[key].component;
                     }
                 });
-                console.log('chegou aqui3');
 
                 const stream = renderToNodeStream(renderStream(component));
-                console.log('chegou aqui4');
 
                 stream.pipe(response)
                 // When React finishes rendering send the rest of your HTML to the browser
                 stream.on('end', () => {
-                    console.log('end response');
                     response.end('</div></body></html>');
                 });
             } else {

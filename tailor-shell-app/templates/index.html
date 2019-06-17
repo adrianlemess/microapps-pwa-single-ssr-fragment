@@ -2,6 +2,8 @@
     <title>Poc Microfronts with Tailor example</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
     <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-startup-image" href="./assets/splash.png" />
+    <!-- <link rel="apple-touch-startup-image" href="images/splash/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"> -->
     <style>
         body {
             background: #ECEFF4;
@@ -18,8 +20,12 @@
 </head>
 
 <body>
-    <div class="service" data-title="header">
+    <!-- <div class="service" data-title="header">
         <fragment id="header"></fragment>
+    </div> -->
+
+    <div class="service" data-title="body">
+        <fragment id="body"></fragment>
     </div>
 </body>
 
